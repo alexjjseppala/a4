@@ -55,7 +55,7 @@ def compress( inputFile, outputFile ):
   outputBytesTemp = bytearray()
   dict = {}
   for ind in range(511):
-      dict[(ind)]
+      dict[(ind)] = ind
   if (len(img.shape) == 3):
       for y in range(img.shape[0]):
           for x in range(img.shape[1]):
@@ -77,13 +77,11 @@ def compress( inputFile, outputFile ):
                   next = diffImg[y,x,c]
                   symbol.append(next)
                   if not(tuple(symbol) in dict):
-                      dict[tuple(symbol)]= len(dict)
+                      if(len(dict) < 65536):
+                        dict[tuple(symbol)]= len(dict)
                       symbol.pop()
-                      outputBytesTemp.append(dict[(symbol)])
+                      outputBytesTemp.append(dict[tuple(symbol)])
                       symbol = next
-
-
-
   else:
       for y in range(img.shape[0]):
           for x in range(img.shape[1]):
