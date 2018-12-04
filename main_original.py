@@ -34,19 +34,7 @@ def compress( inputFile, outputFile ):
   # is 'uint8', meaning that each component is an 8-bit unsigned
   # integer.
 
-  # img = netpbm.imread( inputFile ).astype('uint8')
-  img = np.array(
-    [
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ],
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ],
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ]
-    ])
+  img = netpbm.imread( inputFile ).astype('uint8')
   
   # Compress the image
   #
@@ -60,92 +48,14 @@ def compress( inputFile, outputFile ):
   # one piece for the single-channel case and one piece for the
   # multi-channel case.
 
-
   startTime = time.time()
-  diffImg = np.zeros(img.shape)
+ 
+  outputBytes = bytearray()
 
-  outputBytesTemp = bytearray()
-
-  dictionaryUpdates = []
-
-  #create initial dictionary
-  dict = {}
-  for ind in range(512):
-    #not tuples yet
-    dict[ind] = ind
-
-  #if it is a color image
-  if (len(img.shape) == 3):
-    for y in range(img.shape[0]):
-      for x in range(img.shape[1]):
-        for c in range(img.shape[2]):
-          #setting the initial symbol value
-
-          if y == 0  and x == 0 and c == 0:
-            symbol = [img[0,0,0]]
-
-          if (x == 0): #there are no left pixels
-            diffImg[y, x, c] = img[y, x, c]
-            # next = img[y, x, c]
-          else:
-            diffImg[y, x, c] = img[y, x, c] - img[y, x - 1, c] + 255
-            # next = img[y, x, c] - img[y, x - 1, c] + 255
-          next = [diffImg[y,x,c]]
-
-          # print(diffImg[y,x,c])
-
-          symbol_plus_next = symbol + next
-          # print("buffer = " + str(symbol_plus_next))
-          if(tuple(symbol_plus_next) in dict):
-            symbol = symbol_plus_next
-            # print("seen")
-          else:
-            # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
-            index_value = dict[tuple(symbol)] if(len(symbol) > 1) else dict[symbol[0]]
-            # the index value needs to be split into two bytes
-            # append the first byte
-            dictionaryUpdates.append({"dictionary_key": symbol, "value": index_value})
-            outputBytesTemp.append(index_value/256)
-            # append the second byte
-            outputBytesTemp.append(index_value%256)
-            # print("not seen before")
-            # print("output = " + str(index_value) + "from " + str(symbol))
-            if(len(dict) < 65536):
-              print("dictionary update " + str(tuple(symbol_plus_next)) + "/" + str(len(dict)))
-              dict[tuple(symbol_plus_next)]= len(dict)
-            symbol = next
-  else:
-    for y in range(img.shape[0]):
-      for x in range(img.shape[1]):
-        #setting the initial symbol value
-        if y == 0 and x == 0:
-          symbol = [img[0,0]]
-        if (x == 0): #there are no left pixels
-          diffImg[y, x] = img[y, x]
-        else:
-          diffImg[y, x] = img[y, x] - img[y, x - 1] + 255
-        next = [diffImg[y,x]]
-
-        symbol_plus_next = symbol + next
-
-        if(tuple(symbol_plus_next) in dict):
-          symbol = symbol_plus_next
-        else:
-          # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
-          index_value = dict[tuple(symbol)] if(len(symbol) > 1) else dict[symbol[0]]
-          # the index value needs to be split into two bytes
-          # append the first byte
-          # ouputs.append({"dictionary_key": symbol, "value": index_value})
-          outputBytesTemp.append(index_value/256)
-          # append the second byte
-          outputBytesTemp.append(index_value%256)
-          if(len(dict) < 65536):
-            dict[tuple(symbol_plus_next)]= len(dict)
-          symbol = next
-
-  # for i in range(len(outputBytesTemp)):
-  #   print(outputBytesTemp[i])
-  outputBytes = outputBytesTemp
+  for y in range(img.shape[0]):
+    for x in range(img.shape[1]):
+      for c in range(img.shape[2]):
+        outputBytes.append( img[y,x,c] )
 
   endTime = time.time()
 
