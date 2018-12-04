@@ -141,7 +141,10 @@ def compress( inputFile, outputFile ):
           symbol = symbol_plus_next
         else:
           # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
-          index_value = dict[tuple(symbol)] if(len(symbol) > 1) else dict[symbol[0]]
+            if(len(symbol) > 1):
+              index_value = dict[tuple(symbol)]
+            else:
+              index_value = dict[symbol[0]]
           # the index value needs to be split into two bytes
           # append the first byte
           # dictionaryUpdates.append({"dictionary_key": symbol, "value": index_value})
