@@ -123,7 +123,7 @@ def compress( inputFile, outputFile ):
           diffImg[y, x] = img[y, x]
         else:
           diffImg[y, x] = int(img[y, x]) - int(img[y, x - 1]) + 255
-          
+
         #setting the initial symbol value
         if y == 0 and x == 0:
           symbol = [img[0,0]]
@@ -200,8 +200,10 @@ def uncompress( inputFile, outputFile ):
   startTime = time.time()
   if(channels == 3):
     img = np.empty( [rows,columns,channels], dtype=np.uint8 )
+    diffImgDecode = np.empty( [rows,columns,channels], dtype=np.uint8 )
   else:
     img = np.empty( [rows,columns], dtype=np.uint8 )
+    diffImgDecode = np.empty( [rows,columns], dtype=np.uint8 )
 
   # byteIter = iter(inputBytes)
 
@@ -258,22 +260,20 @@ def uncompress( inputFile, outputFile ):
       for x in range(columns):
         for c in range(channels):
           if (x == 0):
-            prevPixel = symbolLookupIter.next()
-            img[y,x,c] = prevPixel
+            diffImgDecode[y,x,c] = symbolLookupIter.next()
+            img[y,x,c] = diffImgDecode[y,x,c]
           else:
-            pixel = symbolLookupIter.next()
-            img[y,x,c] = pixel + prevPixel - 255
-            prevPixel = img[y,x,c]
+            diffImgDecode[y,x,c] = symbolLookupIter.next()
+            img[y,x,c] = diffImgDecode[y,x,c]  + diffImgDecode[y,x-1,c]  - 255
   else:
     for y in range(rows):
       for x in range(columns):
         if (x == 0):
-          prevPixel = symbolLookupIter.next()
-          img[y,x] = prevPixel
+            diffImgDecode[y,x] = symbolLookupIter.next()
+            img[y,x] = diffImgDecode[y,x]
         else:
-          pixel = symbolLookupIter.next()
-          img[y,x] = pixel + prevPixel - 255
-          prevPixel = img[y,x]
+            diffImgDecode[y,x] = symbolLookupIter.next()
+            img[y,x] = diffImgDecode[y,x]  + diffImgDecode[y,x-1]  - 255
 
   endTime = time.time()
 
