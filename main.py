@@ -47,7 +47,7 @@ def compress( inputFile, outputFile ):
   #       [100,100,100],[100,100,100],[100,100,100]
   #     ]
   #   ])
-  
+
   # Compress the image
   #
   # REPLACE THIS WITH YOUR OWN CODE TO FILL THE 'outputBytes' ARRAY.
@@ -64,7 +64,7 @@ def compress( inputFile, outputFile ):
   startTime = time.time()
   diffImg = np.zeros(img.shape)
 
-  outputBytesTemp = bytearray()
+  outputBytes = bytearray()
 
   # output_with_dictionary_source = []
 
@@ -97,7 +97,7 @@ def compress( inputFile, outputFile ):
         for c in range(img.shape[2]):
           if y == 0  and x == 0 and c == 0:
             #setting the initial symbol value
-            symbol = [img[0,0,0]]
+            symbol = [diffImg[0,0,0]]
           else:
             next = [diffImg[y,x,c]]
             symbol_plus_next = symbol + next
@@ -112,9 +112,9 @@ def compress( inputFile, outputFile ):
               # the index value needs to be split into two bytes
               # append the first byte
               # output_with_dictionary_source.append({"dictionary_key": symbol, "value": index_value})
-              outputBytesTemp.append(index_value/256)
+              outputBytes.append(index_value/256)
               # append the second byte
-              outputBytesTemp.append(index_value%256)
+              outputBytes.append(index_value%256)
               # print("not seen before")
               if(len(dict) < 65536):
                 dict[tuple(symbol_plus_next)]= len(dict)
@@ -140,16 +140,16 @@ def compress( inputFile, outputFile ):
             # the index value needs to be split into two bytes
             # append the first byte
             # output_with_dictionary_source.append({"dictionary_key": symbol, "value": index_value})
-            outputBytesTemp.append(index_value/256)
+            outputBytes.append(index_value/256)
             # append the second byte
-            outputBytesTemp.append(index_value%256)
+            outputBytes.append(index_value%256)
             if(len(dict) < 65536):
               dict[tuple(symbol_plus_next)]= len(dict)
             symbol = next
 
-  # for i in range(len(outputBytesTemp)):
-  #   print(outputBytesTemp[i])
-  outputBytes = outputBytesTemp
+  # for i in range(len(outputBytes)):
+  #   print(outputBytes[i])
+
 
   endTime = time.time()
 
@@ -164,7 +164,7 @@ def compress( inputFile, outputFile ):
   outputFile.write( outputBytes )
 
   # Print information about the compression
-  
+
   inSize  = img.shape[0] * img.shape[1] * img.shape[2]
   outSize = len(outputBytes)
 
@@ -172,7 +172,7 @@ def compress( inputFile, outputFile ):
   sys.stderr.write( 'Output size:        %d bytes\n' % outSize )
   sys.stderr.write( 'Compression factor: %.2f\n' % (inSize/float(outSize)) )
   sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
-  
+
 
 
 # Uncompress an image
@@ -184,8 +184,8 @@ def uncompress( inputFile, outputFile ):
   if inputFile.readline() != headerText + '\n':
     sys.stderr.write( "Input is not in the '%s' format.\n" % headerText )
     sys.exit(1)
-    
-  # Read the rows, columns, and channels.  
+
+  # Read the rows, columns, and channels.
 
   rows, columns, channels = [ int(x) for x in inputFile.readline().split() ]
 
@@ -202,10 +202,60 @@ def uncompress( inputFile, outputFile ):
   img = np.empty( [rows,columns,channels], dtype=np.uint8 )
 
   byteIter = iter(inputBytes)
-  for y in range(rows):
-    for x in range(columns):
-      for c in range(channels):
-        img[y,x,c] = byteIter.next()
+
+  #create a list with each symbol from LZW (2 bytes each)
+  symbols = []
+  for i in range(len(byteIter)):
+      if (i % 2 == 0):
+          temp = byteIter[i]
+      else:
+          symbols.append((temp << 8) | byteIter[i])
+  # set up the initial dictionary
+  dictDecode = {}
+  for ind in range(512):
+    #not tuples yet
+    dictDecode[ind] = ind
+
+  # look up symbols in the dictionary as they appear, also update dictionary
+  # symbolLookup should be a list of all symbols originally encoded
+  prevSym = list(dictDecode[symbols[0]]) # deal with the first symbol case, prevSym will be an int here
+  symbolLookup = prevSym
+  for index in range(1, len(symbols)):
+      if (symbols[index] in dictDecode):
+          sym = list(dictDecode[symbols[index]])
+          symbolLookup += sym
+          dictDecode[symbols[index]] = tuple(sym + prevSym[0])
+          prevSym = sym
+      else:
+          sym = prevSym + prevSym[0]
+          symbolLookup += sym
+          dictDecode[symbols[index]] = tuple(sym)
+          prevSym = sym
+
+    # undo the 'difference' encoding
+  symbolLookupIter = iter(symbolLookup)
+
+  if (channels == 3):
+    for y in range(rows):
+      for x in range(columns):
+        for c in range(channels):
+          if (x == 0):
+            prevPixel = symbolLookup.next()
+            img[y,x,c] = prevPixel
+          else:
+            pixel = symbolLookup.next()
+            img[y,x,c] = pixel + prevPixel - 255
+            prevPixel = pixel
+  else:
+    for y in range(rows):
+      for x in range(columns):
+        if (x == 0):
+          prevPixel = symbolLookup.next()
+          img[y,x] = prevPixel
+        else:
+          pixel = symbolLookup.next()
+          img[y,x] = pixel + prevPixel - 255
+          prevPixel = pixel
 
   endTime = time.time()
 
@@ -215,10 +265,10 @@ def uncompress( inputFile, outputFile ):
 
   sys.stderr.write( 'Uncompression time: %.2f seconds\n' % (endTime - startTime) )
 
-  
 
-  
-# The command line is 
+
+
+# The command line is
 #
 #   main.py {flag} {input image filename} {output image filename}
 #
@@ -231,7 +281,7 @@ if len(sys.argv) < 4:
   sys.exit(1)
 
 # Get input file
- 
+
 if sys.argv[2] == '-':
   inputFile = sys.stdin
 else:
