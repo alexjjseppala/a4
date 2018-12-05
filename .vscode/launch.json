@@ -5,6 +5,30 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Uncompress mandrill.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "mandrill.cmp",
+                "uncompressed_mandrill.pnm"
+            ],
+        },
+        {
+            "name": "Compress mandrill.pnm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "c",
+                "images/mandrill.pnm",
+                "mandrill.cmp"
+            ],
+        },
+        {
             "name": "Uncompress whatsapp.cmp",
             "type": "python",
             "request": "launch",

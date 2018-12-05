@@ -79,9 +79,11 @@ def compress( inputFile, outputFile ):
     # the index value needs to be split into two bytes
     # append the first byte
     output_with_dictionary_source.append({"dictionary_key": output_symbol, "value": index_value})
-    outputBytes.append(index_value/256)
+    # outputBytes.append(index_value/256)
+    outputBytes.append(index_value >> 8)
     # append the second byte
-    outputBytes.append(index_value%256)
+    # outputBytes.append(index_value%256)
+    outputBytes.append(index_value & 0xff)
 
   for ind in range(512):
     #not tuples yet
@@ -137,8 +139,8 @@ def compress( inputFile, outputFile ):
             if(len(dict) < 65536):
               dict[tuple(symbol_plus_next)]= len(dict)
             symbol = next
-            if (y == img.shape[0] - 1) and (x == img.shape[1] - 1):
-              output(symbol)
+          if (y == img.shape[0] - 1) and (x == img.shape[1] - 1):
+            output(symbol)
 
   # for i in range(20):
   #   print(outputBytes[i])
