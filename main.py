@@ -34,19 +34,19 @@ def compress( inputFile, outputFile ):
   # is 'uint8', meaning that each component is an 8-bit unsigned
   # integer.
 
-  img = netpbm.imread( inputFile ).astype('uint8')
-  # img = np.array(
-  #   [
-  #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
-  #     ],
-  #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
-  #     ],
-  #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
-  #     ]
-  #   ])
+  # img = netpbm.imread( inputFile ).astype('uint8')
+  img = np.array(
+    [
+      [
+        [100,100,100],[100,100,100],[100,100,100]
+      ],
+      [
+        [100,100,100],[100,100,100],[100,100,100]
+      ],
+      [
+        [100,100,100],[100,100,100],[100,100,100]
+      ]
+    ])
 
   # Compress the image
   #
@@ -66,10 +66,23 @@ def compress( inputFile, outputFile ):
 
   outputBytes = bytearray()
 
-  # output_with_dictionary_source = []
+  output_with_dictionary_source = []
 
   #create initial dictionary
   dict = {}
+
+  def output(output_symbol):
+    if(len(output_symbol) > 1):
+      index_value = dict[tuple(symbol)]
+    else:
+      index_value = dict[symbol[0]]
+    # the index value needs to be split into two bytes
+    # append the first byte
+    output_with_dictionary_source.append({"dictionary_key": output_symbol, "value": index_value})
+    outputBytes.append(index_value/256)
+    # append the second byte
+    outputBytes.append(index_value%256)
+
   for ind in range(512):
     #not tuples yet
     dict[ind] = ind
@@ -105,20 +118,12 @@ def compress( inputFile, outputFile ):
               symbol = symbol_plus_next
             else:
               # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
-              if(len(symbol) > 1):
-                index_value = dict[tuple(symbol)]
-              else:
-                index_value = dict[symbol[0]]
-              # the index value needs to be split into two bytes
-              # append the first byte
-              # output_with_dictionary_source.append({"dictionary_key": symbol, "value": index_value})
-              outputBytes.append(index_value/256)
-              # append the second byte
-              outputBytes.append(index_value%256)
-              # print("not seen before")
+              output(symbol)
               if(len(dict) < 65536):
                 dict[tuple(symbol_plus_next)]= len(dict)
               symbol = next
+              if (y == img.shape[0] - 1) and (x == img.shape[1] - 1) and (c == img.shape[2] - 1):
+                output(symbol)
   else:
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
@@ -133,19 +138,12 @@ def compress( inputFile, outputFile ):
             symbol = symbol_plus_next
           else:
             # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
-            if(len(symbol) > 1):
-              index_value = dict[tuple(symbol)]
-            else:
-              index_value = dict[symbol[0]]
-            # the index value needs to be split into two bytes
-            # append the first byte
-            # output_with_dictionary_source.append({"dictionary_key": symbol, "value": index_value})
-            outputBytes.append(index_value/256)
-            # append the second byte
-            outputBytes.append(index_value%256)
+            output(symbol)
             if(len(dict) < 65536):
               dict[tuple(symbol_plus_next)]= len(dict)
             symbol = next
+            if (y == img.shape[0] - 1) and (x == img.shape[1] - 1):
+              output(symbol)
 
   # for i in range(len(outputBytes)):
   #   print(outputBytes[i])
@@ -201,15 +199,18 @@ def uncompress( inputFile, outputFile ):
 
   img = np.empty( [rows,columns,channels], dtype=np.uint8 )
 
-  byteIter = iter(inputBytes)
+  # byteIter = iter(inputBytes)
 
   #create a list with each symbol from LZW (2 bytes each)
   symbols = []
-  for i in range(len(byteIter)):
+  # for i in range(len(byteIter)):
+  for i in range(len(inputBytes)):
       if (i % 2 == 0):
-          temp = byteIter[i]
+          # temp = byteIter[i]
+          temp = inputBytes[i]
       else:
-          symbols.append((temp << 8) | byteIter[i])
+          # symbols.append((temp << 8) | byteIter[i])
+          symbols.append((temp << 8) | inputBytes[i])
   # set up the initial dictionary
   dictDecode = {}
   for ind in range(512):
@@ -218,16 +219,25 @@ def uncompress( inputFile, outputFile ):
 
   # look up symbols in the dictionary as they appear, also update dictionary
   # symbolLookup should be a list of all symbols originally encoded
-  prevSym = list(dictDecode[symbols[0]]) # deal with the first symbol case, prevSym will be an int here
+  # prevSym = list(dictDecode[symbols[0]]) # deal with the first symbol case, prevSym will be an int here
+  #either a tuple or a int
+  prevSym = [dictDecode[symbols[0]]] # deal with the first symbol case, prevSym will be an int here
   symbolLookup = prevSym
+
+  #sym, prevsym and symbolLookup are lists
+
   for index in range(1, len(symbols)):
       if (symbols[index] in dictDecode):
-          sym = list(dictDecode[symbols[index]])
+          # sym = list(dictDecode[symbols[index]])
+          decodedSymbol = dictDecode[symbols[index]]
+          sym = [decodedSymbol] if type(decodedSymbol) == int else list(decodedSymbol)
           symbolLookup += sym
-          dictDecode[symbols[index]] = tuple(sym + prevSym[0])
+          dictDecode[symbols[index]] = tuple(sym + [prevSym[0]])
           prevSym = sym
       else:
-          sym = prevSym + prevSym[0]
+          #both need to be lists
+          # sym = prevSym + prevSym[0]
+          sym = prevSym + [prevSym[0]]
           symbolLookup += sym
           dictDecode[symbols[index]] = tuple(sym)
           prevSym = sym
@@ -240,22 +250,22 @@ def uncompress( inputFile, outputFile ):
       for x in range(columns):
         for c in range(channels):
           if (x == 0):
-            prevPixel = symbolLookup.next()
+            prevPixel = symbolLookupIter.next()
             img[y,x,c] = prevPixel
           else:
-            pixel = symbolLookup.next()
+            pixel = symbolLookupIter.next()
             img[y,x,c] = pixel + prevPixel - 255
-            prevPixel = pixel
+            prevPixel = pixel - 255
   else:
     for y in range(rows):
       for x in range(columns):
         if (x == 0):
-          prevPixel = symbolLookup.next()
+          prevPixel = symbolLookupIter.next()
           img[y,x] = prevPixel
         else:
-          pixel = symbolLookup.next()
+          pixel = symbolLookupIter.next()
           img[y,x] = pixel + prevPixel - 255
-          prevPixel = pixel
+          prevPixel = pixel - 255
 
   endTime = time.time()
 
