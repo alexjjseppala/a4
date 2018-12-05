@@ -113,8 +113,8 @@ def compress( inputFile, outputFile ):
               if(len(dict) < 65536):
                 dict[tuple(symbol_plus_next)]= len(dict)
               symbol = next
-              if (y == img.shape[0] - 1) and (x == img.shape[1] - 1) and (c == img.shape[2] - 1):
-                output(symbol)
+            if (y == img.shape[0] - 1) and (x == img.shape[1] - 1) and (c == img.shape[2] - 1):
+              output(symbol)
   else:
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
@@ -171,8 +171,8 @@ def compress( inputFile, outputFile ):
   sys.stderr.write( 'Input size:         %d bytes\n' % inSize )
   sys.stderr.write( 'Output size:        %d bytes\n' % outSize )
   sys.stderr.write( 'Compression factor: %.2f\n' % (inSize/float(outSize)) )
-  # sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
-  sys.stderr.write( 'Compression time:   %.4f seconds\n' % (endTime - startTime) )
+  sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
+  # sys.stderr.write( 'Compression time:   %.4f seconds\n' % (endTime - startTime) )
 
 
 # Uncompress an image

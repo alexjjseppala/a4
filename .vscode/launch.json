@@ -5,6 +5,30 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Uncompress crest.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "crest.cmp",
+                "uncompressed_crest.pnm"
+            ],
+        },
+        {
+            "name": "Compress crest.pnm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "c",
+                "images/crest.pnm",
+                "crest.cmp"
+            ],
+        },
+        {
             "name": "Uncompress mandrill.cmp",
             "type": "python",
             "request": "launch",
