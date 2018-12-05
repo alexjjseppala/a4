@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Uncompress noise.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "noise.cmp",
+                "uncompressed_noise.pnm"
+            ],
+        },
+        {
             "name": "Uncompress cortex.cmp",
             "type": "python",
             "request": "launch",

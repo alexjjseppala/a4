@@ -34,19 +34,19 @@ def compress( inputFile, outputFile ):
   # is 'uint8', meaning that each component is an 8-bit unsigned
   # integer.
 
-  # img = netpbm.imread( inputFile ).astype('uint8')
-  img = np.array(
-    [
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ],
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ],
-      [
-        [100,100,100],[100,100,100],[100,100,100]
-      ]
-    ])
+  img = netpbm.imread( inputFile ).astype('uint8')
+  # img = np.array(
+  #   [
+  #     [
+  #       [100,100,100],[100,100,100],[100,100,100]
+  #     ],
+  #     [
+  #       [100,100,100],[100,100,100],[100,100,100]
+  #     ],
+  #     [
+  #       [100,100,100],[100,100,100],[100,100,100]
+  #     ]
+  #   ])
 
   # Compress the image
   #
@@ -87,27 +87,17 @@ def compress( inputFile, outputFile ):
     #not tuples yet
     dict[ind] = ind
 
-  if (len(img.shape) == 3):
-    for y in range(img.shape[0]):
-      for x in range(img.shape[1]):
-        for c in range(img.shape[2]):
-          if (x == 0): #there are no left pixels
-            diffImg[y, x, c] = img[y, x, c]
-          else:
-            diffImg[y, x, c] = img[y, x, c] - img[y, x - 1, c] + 255
-  else:
-    for y in range(img.shape[0]):
-      for x in range(img.shape[1]):
-        if (x == 0): #there are no left pixels
-          diffImg[y, x] = img[y, x]
-        else:
-          diffImg[y, x] = img[y, x] - img[y, x - 1] + 255
-
   #if it is a color image
   if (len(img.shape) == 3):
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
         for c in range(img.shape[2]):
+
+          if (x == 0): #there are no left pixels
+            diffImg[y, x, c] = img[y, x, c]
+          else:
+            diffImg[y, x, c] = img[y, x, c] - img[y, x - 1, c] + 255
+
           if y == 0  and x == 0 and c == 0:
             #setting the initial symbol value
             symbol = [diffImg[0,0,0]]
@@ -127,6 +117,12 @@ def compress( inputFile, outputFile ):
   else:
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
+
+        if (x == 0): #there are no left pixels
+          diffImg[y, x] = img[y, x]
+        else:
+          diffImg[y, x] = img[y, x] - img[y, x - 1] + 255
+          
         #setting the initial symbol value
         if y == 0 and x == 0:
           symbol = [img[0,0]]
@@ -158,19 +154,24 @@ def compress( inputFile, outputFile ):
   # reconstructed.
 
   outputFile.write( '%s\n'       % headerText )
-  outputFile.write( '%d %d %d\n' % (img.shape[0], img.shape[1], img.shape[2]) )
+  if len(img.shape) == 3:
+    outputFile.write( '%d %d %d\n' % (img.shape[0], img.shape[1], img.shape[2]) )
+  else:
+    outputFile.write( '%d %d %d\n' % (img.shape[0], img.shape[1], 1) )
   outputFile.write( outputBytes )
 
   # Print information about the compression
-
-  inSize  = img.shape[0] * img.shape[1] * img.shape[2]
+  if len(img.shape) == 3:
+    inSize  = img.shape[0] * img.shape[1] * img.shape[2]
+  else:
+    inSize  = img.shape[0] * img.shape[1]
   outSize = len(outputBytes)
 
   sys.stderr.write( 'Input size:         %d bytes\n' % inSize )
   sys.stderr.write( 'Output size:        %d bytes\n' % outSize )
   sys.stderr.write( 'Compression factor: %.2f\n' % (inSize/float(outSize)) )
-  sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
-
+  # sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
+  sys.stderr.write( 'Compression time:   %.4f seconds\n' % (endTime - startTime) )
 
 
 # Uncompress an image
@@ -196,8 +197,10 @@ def uncompress( inputFile, outputFile ):
   # REPLACE THIS WITH YOUR OWN CODE TO CONVERT THE 'inputBytes' ARRAY INTO AN IMAGE IN 'img'.
 
   startTime = time.time()
-
-  img = np.empty( [rows,columns,channels], dtype=np.uint8 )
+  if(channels == 3):
+    img = np.empty( [rows,columns,channels], dtype=np.uint8 )
+  else:
+    img = np.empty( [rows,columns], dtype=np.uint8 )
 
   # byteIter = iter(inputBytes)
 
@@ -232,7 +235,8 @@ def uncompress( inputFile, outputFile ):
           decodedSymbol = dictDecode[symbols[index]]
           sym = [decodedSymbol] if type(decodedSymbol) == int else list(decodedSymbol)
           symbolLookup += sym
-          dictDecode[symbols[index]] = tuple(sym + [prevSym[0]])
+          # dictDecode[symbols[index]] = tuple([prevSym[0]] + sym)
+          dictDecode[len(dictDecode)] = tuple(prevSym + [sym[0]])
           prevSym = sym
       else:
           #both need to be lists
@@ -255,7 +259,7 @@ def uncompress( inputFile, outputFile ):
           else:
             pixel = symbolLookupIter.next()
             img[y,x,c] = pixel + prevPixel - 255
-            prevPixel = pixel - 255
+            prevPixel = img[y,x,c]
   else:
     for y in range(rows):
       for x in range(columns):
@@ -265,7 +269,7 @@ def uncompress( inputFile, outputFile ):
         else:
           pixel = symbolLookupIter.next()
           img[y,x] = pixel + prevPixel - 255
-          prevPixel = pixel - 255
+          prevPixel = img[y,x]
 
   endTime = time.time()
 
