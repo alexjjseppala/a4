@@ -92,11 +92,10 @@ def compress( inputFile, outputFile ):
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
         for c in range(img.shape[2]):
-
           if (x == 0): #there are no left pixels
             diffImg[y, x, c] = img[y, x, c]
           else:
-            diffImg[y, x, c] = img[y, x, c] - img[y, x - 1, c] + 255
+            diffImg[y, x, c] = int(img[y, x, c]) - int(img[y, x - 1, c]) + 255
 
           if y == 0  and x == 0 and c == 0:
             #setting the initial symbol value
@@ -121,7 +120,7 @@ def compress( inputFile, outputFile ):
         if (x == 0): #there are no left pixels
           diffImg[y, x] = img[y, x]
         else:
-          diffImg[y, x] = img[y, x] - img[y, x - 1] + 255
+          diffImg[y, x] = int(img[y, x]) - int(img[y, x - 1]) + 255
           
         #setting the initial symbol value
         if y == 0 and x == 0:
@@ -141,7 +140,7 @@ def compress( inputFile, outputFile ):
             if (y == img.shape[0] - 1) and (x == img.shape[1] - 1):
               output(symbol)
 
-  # for i in range(len(outputBytes)):
+  # for i in range(20):
   #   print(outputBytes[i])
 
 
@@ -236,14 +235,17 @@ def uncompress( inputFile, outputFile ):
           sym = [decodedSymbol] if type(decodedSymbol) == int else list(decodedSymbol)
           symbolLookup += sym
           # dictDecode[symbols[index]] = tuple([prevSym[0]] + sym)
-          dictDecode[len(dictDecode)] = tuple(prevSym + [sym[0]])
+          if(len(dictDecode) < 65536):
+            dictDecode[len(dictDecode)] = tuple(prevSym + [sym[0]])
           prevSym = sym
       else:
           #both need to be lists
           # sym = prevSym + prevSym[0]
           sym = prevSym + [prevSym[0]]
           symbolLookup += sym
-          dictDecode[symbols[index]] = tuple(sym)
+          if(len(dictDecode) < 65536):
+            dictDecode[symbols[index]] = tuple(sym)
+          # dictDecode[len(dictDecode)] = tuple(sym)
           prevSym = sym
 
     # undo the 'difference' encoding

@@ -5,6 +5,30 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Uncompress whatsapp.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "whatsapp.cmp",
+                "uncompressed_whatsapp.pnm"
+            ],
+        },
+        {
+            "name": "Compress whatsapp.pnm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "c",
+                "images/whatsapp.pnm",
+                "whatsapp.cmp"
+            ],
+        },
+        {
             "name": "Uncompress noise.cmp",
             "type": "python",
             "request": "launch",
