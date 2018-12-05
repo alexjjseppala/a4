@@ -38,13 +38,13 @@ def compress( inputFile, outputFile ):
   # img = np.array(
   #   [
   #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
+  #       [0,0,0],[50,50,50],[125,125,125]
   #     ],
   #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
+  #       [50,50,50],[125,125,125],[180,180,180]
   #     ],
   #     [
-  #       [100,100,100],[100,100,100],[100,100,100]
+  #       [125,125,125],[180,180,180],[240,240,240]
   #     ]
   #   ])
 
@@ -73,9 +73,9 @@ def compress( inputFile, outputFile ):
 
   def output(output_symbol):
     if(len(output_symbol) > 1):
-      index_value = dict[tuple(symbol)]
+      index_value = dict[tuple(output_symbol)]
     else:
-      index_value = dict[symbol[0]]
+      index_value = dict[output_symbol[0]]
     # the index value needs to be split into two bytes
     # append the first byte
     output_with_dictionary_source.append({"dictionary_key": output_symbol, "value": index_value})
