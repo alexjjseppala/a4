@@ -34,19 +34,19 @@ def compress( inputFile, outputFile ):
   # is 'uint8', meaning that each component is an 8-bit unsigned
   # integer.
 
-  # img = netpbm.imread( inputFile ).astype('uint8')
-  img = np.array(
-    [
-      [
-        [50,0,255],[50,0,255],[50,0,255]
-      ],
-      [
-        [50,0,255],[50,0,255],[50,0,255]
-      ],
-      [
-        [50,0,255],[50,0,255],[50,0,255]
-      ]
-    ])
+  img = netpbm.imread( inputFile ).astype('uint8')
+  # img = np.array(
+  #   [
+  #     [
+  #       [50,0,255],[50,0,255],[50,0,255]
+  #     ],
+  #     [
+  #       [50,0,255],[50,0,255],[50,0,255]
+  #     ],
+  #     [
+  #       [50,0,255],[50,0,255],[50,0,255]
+  #     ]
+  #   ])
 
   # Compress the image
   #
@@ -228,7 +228,7 @@ def uncompress( inputFile, outputFile ):
   # prevSym = list(dictDecode[symbols[0]]) # deal with the first symbol case, prevSym will be an int here
   #either a tuple or a int
   prevSym = [dictDecode[symbols[0]]] # deal with the first symbol case, prevSym will be an int here
-  symbolLookup = prevSym
+  symbolLookup = prevSym[:]
 
   #sym, prevsym and symbolLookup are lists
 
