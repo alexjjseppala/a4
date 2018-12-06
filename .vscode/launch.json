@@ -5,54 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Uncompress red2.cmp",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "u",
-                "red2.cmp",
-                "uncompressed_red2.pnm"
-            ],
-        },
-        {
-            "name": "Compress red2.pnm",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "c",
-                "images/red2.pnm",
-                "red2.cmp"
-            ],
-        },
-        {
-            "name": "Uncompress red.cmp",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "u",
-                "red.cmp",
-                "uncompressed_red.pnm"
-            ],
-        },
-        {
-            "name": "Compress red.pnm",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "c",
-                "images/red.pnm",
-                "red.cmp"
-            ],
-        },
-        {
             "name": "Uncompress crest.cmp",
             "type": "python",
             "request": "launch",
@@ -101,30 +53,6 @@
             ],
         },
         {
-            "name": "Uncompress whatsapp.cmp",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "u",
-                "whatsapp.cmp",
-                "uncompressed_whatsapp.pnm"
-            ],
-        },
-        {
-            "name": "Compress whatsapp.pnm",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "c",
-                "images/whatsapp.pnm",
-                "whatsapp.cmp"
-            ],
-        },
-        {
             "name": "Uncompress noise.cmp",
             "type": "python",
             "request": "launch",
@@ -134,18 +62,6 @@
                 "u",
                 "noise.cmp",
                 "uncompressed_noise.pnm"
-            ],
-        },
-        {
-            "name": "Uncompress cortex.cmp",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "u",
-                "cortex.cmp",
-                "uncompressed_cortex.pnm"
             ],
         },
         {
@@ -161,6 +77,18 @@
             ],
         },
         {
+            "name": "Uncompress cortex.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "cortex.cmp",
+                "uncompressed_cortex.pnm"
+            ],
+        },
+        {
             "name": "Compress cortex.pnm",
             "type": "python",
             "request": "launch",
@@ -170,6 +98,18 @@
                 "c",
                 "images/cortex.pnm",
                 "cortex.cmp"
+            ],
+        },
+        {
+            "name": "Uncompress barbara.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "barbara.cmp",
+                "uncompressed_barbara.pnm"
             ],
         },
         {

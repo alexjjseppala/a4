@@ -1,0 +1,39 @@
+crest
+Input size:         5472000 bytes
+Output size:        278422 bytes
+Compression factor: 19.65
+Compression time:   43.07 seconds
+
+Uncompression time: 12.00 seconds 
+
+mandrill
+Input size:         814080 bytes
+Output size:        471868 bytes
+Compression factor: 1.73
+Compression time:   4.32 seconds
+
+Uncompression time: 2.26 seconds
+
+noise
+Input size:         1048576 bytes
+Output size:        1206352 bytes
+Compression factor: 0.87
+Compression time:   7.04 seconds
+
+Uncompression time: 3.24 seconds
+
+cortex
+Input size:         1961712 bytes
+Output size:        321272 bytes
+Compression factor: 6.11
+Compression time:   11.63 seconds
+
+Uncompression time: 4.47 seconds
+
+barbara
+Input size:         786432 bytes
+Output size:        477310 bytes
+Compression factor: 1.65
+Compression time:   4.26 seconds
+
+Uncompression time: 2.27 seconds
