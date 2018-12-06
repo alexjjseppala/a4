@@ -37,3 +37,13 @@ Compression factor: 1.65
 Compression time:   4.26 seconds
 
 Uncompression time: 2.27 seconds
+
+
+
+sizes of zipped images
+
+623621 barbara.pnm.zip
+423699 cortex.pnm.zip
+252683 crest.pnm.zip
+613494 mandrill.pnm.zip
+1009731 noise.pnm.zip
