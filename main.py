@@ -34,19 +34,19 @@ def compress( inputFile, outputFile ):
   # is 'uint8', meaning that each component is an 8-bit unsigned
   # integer.
 
-  img = netpbm.imread( inputFile ).astype('uint8')
-  # img = np.array(
-  #   [
-  #     [
-  #       [0,0,0],[50,50,50],[125,125,125]
-  #     ],
-  #     [
-  #       [50,50,50],[125,125,125],[180,180,180]
-  #     ],
-  #     [
-  #       [125,125,125],[180,180,180],[240,240,240]
-  #     ]
-  #   ])
+  # img = netpbm.imread( inputFile ).astype('uint8')
+  img = np.array(
+    [
+      [
+        [50,0,255],[50,0,255],[50,0,255]
+      ],
+      [
+        [50,0,255],[50,0,255],[50,0,255]
+      ],
+      [
+        [50,0,255],[50,0,255],[50,0,255]
+      ]
+    ])
 
   # Compress the image
   #
@@ -264,7 +264,7 @@ def uncompress( inputFile, outputFile ):
             img[y,x,c] = diffImgDecode[y,x,c]
           else:
             diffImgDecode[y,x,c] = symbolLookupIter.next()
-            img[y,x,c] = diffImgDecode[y,x,c]  + diffImgDecode[y,x-1,c]  - 255
+            img[y,x,c] = int(diffImgDecode[y,x,c])  + int(img[y,x-1,c])  - 255
   else:
     for y in range(rows):
       for x in range(columns):
@@ -273,7 +273,7 @@ def uncompress( inputFile, outputFile ):
             img[y,x] = diffImgDecode[y,x]
         else:
             diffImgDecode[y,x] = symbolLookupIter.next()
-            img[y,x] = diffImgDecode[y,x]  + diffImgDecode[y,x-1]  - 255
+            img[y,x] = int(diffImgDecode[y,x])  + int(img[y,x-1])  - 255
 
   endTime = time.time()
 

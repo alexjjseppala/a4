@@ -4,7 +4,54 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "name": "Uncompress red2.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "red2.cmp",
+                "uncompressed_red2.pnm"
+            ],
+        },
+        {
+            "name": "Compress red2.pnm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "c",
+                "images/red2.pnm",
+                "red2.cmp"
+            ],
+        },
+        {
+            "name": "Uncompress red.cmp",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "u",
+                "red.cmp",
+                "uncompressed_red.pnm"
+            ],
+        },
+        {
+            "name": "Compress red.pnm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "c",
+                "images/red.pnm",
+                "red.cmp"
+            ],
+        },
         {
             "name": "Uncompress crest.cmp",
             "type": "python",
