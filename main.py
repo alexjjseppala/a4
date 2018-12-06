@@ -35,42 +35,17 @@ def compress( inputFile, outputFile ):
   # integer.
 
   img = netpbm.imread( inputFile ).astype('uint8')
-  # img = np.array(
-  #   [
-  #     [
-  #       [50,0,255],[50,0,255],[50,0,255]
-  #     ],
-  #     [
-  #       [50,0,255],[50,0,255],[50,0,255]
-  #     ],
-  #     [
-  #       [50,0,255],[50,0,255],[50,0,255]
-  #     ]
-  #   ])
 
   # Compress the image
-  #
-  # REPLACE THIS WITH YOUR OWN CODE TO FILL THE 'outputBytes' ARRAY.
-  #
-  # Note that single-channel images will have a 'shape' with only two
-  # components: the y dimensions and the x dimension.  So you will
-  # have to detect this and set the number of channels accordingly.
-  # Furthermore, single-channel images must be indexed as img[y,x]
-  # instead of img[y,x,1].  You'll need two pieces of similar code:
-  # one piece for the single-channel case and one piece for the
-  # multi-channel case.
 
+  startTime = time.time() # start timing
 
-  startTime = time.time()
-  diffImg = np.zeros(img.shape)
+  diffImg = np.zeros(img.shape) # create an empty image to store the difference image
+  outputBytes = bytearray() # byte array to write to file as compressed image
 
-  outputBytes = bytearray()
-
-  output_with_dictionary_source = []
-
-  #create initial dictionary
+  # initialize dictionary
   dict = {}
-
+ # append an index value to outputBytes and add it to the dictionary
   def output(output_symbol):
     if(len(output_symbol) > 1):
       index_value = dict[tuple(output_symbol)]
@@ -78,48 +53,45 @@ def compress( inputFile, outputFile ):
       index_value = dict[output_symbol[0]]
     # the index value needs to be split into two bytes
     # append the first byte
-    output_with_dictionary_source.append({"dictionary_key": output_symbol, "value": index_value})
-    # outputBytes.append(index_value/256)
     outputBytes.append(index_value >> 8)
     # append the second byte
-    # outputBytes.append(index_value%256)
     outputBytes.append(index_value & 0xff)
 
+# populate initial dictionary with all possible diffImg values
   for ind in range(512):
-    #not tuples yet
     dict[ind] = ind
 
-  #if it is a color image
+  # if it is a color (3 channel) image
   if (len(img.shape) == 3):
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
         for c in range(img.shape[2]):
-          if (x == 0): #there are no left pixels
+          if (x == 0): # there are no pixels to the left
             diffImg[y, x, c] = img[y, x, c]
           else:
+            # create difference image and add 255 to keep index values positive
             diffImg[y, x, c] = int(img[y, x, c]) - int(img[y, x - 1, c]) + 255
-
           if y == 0  and x == 0 and c == 0:
             #setting the initial symbol value
             symbol = [diffImg[0,0,0]]
           else:
             next = [diffImg[y,x,c]]
             symbol_plus_next = symbol + next
-            if(tuple(symbol_plus_next) in dict):
+            if(tuple(symbol_plus_next) in dict): # if S + x is already in the dictionary
               symbol = symbol_plus_next
-            else:
+            else: # if S + x is not in the dictionary
               # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
               output(symbol)
-              if(len(dict) < 65536):
+              if(len(dict) < 65536): # restrict dictionary size so all indices are 2 bytes
                 dict[tuple(symbol_plus_next)]= len(dict)
               symbol = next
+            # output final symbol
             if (y == img.shape[0] - 1) and (x == img.shape[1] - 1) and (c == img.shape[2] - 1):
               output(symbol)
-  else:
+  else: # for an intensity only (1 channel) image
     for y in range(img.shape[0]):
       for x in range(img.shape[1]):
-
-        if (x == 0): #there are no left pixels
+        if (x == 0): #there are no pixels to the left
           diffImg[y, x] = img[y, x]
         else:
           diffImg[y, x] = int(img[y, x]) - int(img[y, x - 1]) + 255
@@ -131,22 +103,18 @@ def compress( inputFile, outputFile ):
           next = [diffImg[y,x]]
           symbol_plus_next = symbol + next
 
-          if(tuple(symbol_plus_next) in dict):
+          if(tuple(symbol_plus_next) in dict): # if S + x is in the dictionary
             symbol = symbol_plus_next
-          else:
+          else: # if S + x is not in the dictionary
             # if symbol has more than a single value use a tuple, otherwise use int for dict indexing
             output(symbol)
-            if(len(dict) < 65536):
+            if(len(dict) < 65536): # keep the dictionary size restricted
               dict[tuple(symbol_plus_next)]= len(dict)
             symbol = next
-          if (y == img.shape[0] - 1) and (x == img.shape[1] - 1):
+          if (y == img.shape[0] - 1) and (x == img.shape[1] - 1): # output final symbol
             output(symbol)
 
-  # for i in range(20):
-  #   print(outputBytes[i])
-
-
-  endTime = time.time()
+  endTime = time.time() # finish timing
 
   # Output the bytes
   #
@@ -194,10 +162,10 @@ def uncompress( inputFile, outputFile ):
   inputBytes = bytearray(inputFile.read())
 
   # Build the image
-  #
-  # REPLACE THIS WITH YOUR OWN CODE TO CONVERT THE 'inputBytes' ARRAY INTO AN IMAGE IN 'img'.
 
-  startTime = time.time()
+  startTime = time.time() # start the timer
+
+  # get rows, columns, channels info from compressed image
   if(channels == 3):
     img = np.empty( [rows,columns,channels], dtype=np.uint8 )
     diffImgDecode = np.empty( [rows,columns,channels], dtype=np.uint8 )
@@ -205,19 +173,17 @@ def uncompress( inputFile, outputFile ):
     img = np.empty( [rows,columns], dtype=np.uint8 )
     diffImgDecode = np.empty( [rows,columns], dtype=np.uint8 )
 
-  # byteIter = iter(inputBytes)
-
-  #create a list with each symbol from LZW (2 bytes each)
+  # create a list with each symbol from LZW (2 bytes each)
   symbols = []
-  # for i in range(len(byteIter)):
+  # reconstruct symbols from the byte array
   for i in range(len(inputBytes)):
       if (i % 2 == 0):
-          # temp = byteIter[i]
           temp = inputBytes[i]
       else:
-          # symbols.append((temp << 8) | byteIter[i])
           symbols.append((temp << 8) | inputBytes[i])
-  # set up the initial dictionary
+
+  # set up the initial dictionary for decoding with the same initial dictionary
+  # as for encoding
   dictDecode = {}
   for ind in range(512):
     #not tuples yet
@@ -225,47 +191,38 @@ def uncompress( inputFile, outputFile ):
 
   # look up symbols in the dictionary as they appear, also update dictionary
   # symbolLookup should be a list of all symbols originally encoded
-  # prevSym = list(dictDecode[symbols[0]]) # deal with the first symbol case, prevSym will be an int here
-  #either a tuple or a int
-  prevSym = [dictDecode[symbols[0]]] # deal with the first symbol case, prevSym will be an int here
+  prevSym = [dictDecode[symbols[0]]] # deal with the first symbol case
   symbolLookup = prevSym[:]
 
-  #sym, prevsym and symbolLookup are lists
-
   for index in range(1, len(symbols)):
-      if (symbols[index] in dictDecode):
-          # sym = list(dictDecode[symbols[index]])
+      if (symbols[index] in dictDecode): # if symbol is in dictonary
           decodedSymbol = dictDecode[symbols[index]]
           sym = [decodedSymbol] if type(decodedSymbol) == int else list(decodedSymbol)
           symbolLookup += sym
-          # dictDecode[symbols[index]] = tuple([prevSym[0]] + sym)
-          if(len(dictDecode) < 65536):
+          if(len(dictDecode) < 65536): # dictionary restricted like encoding case
             dictDecode[len(dictDecode)] = tuple(prevSym + [sym[0]])
           prevSym = sym
-      else:
-          #both need to be lists
-          # sym = prevSym + prevSym[0]
+      else: # if symbol is not in dictionary
           sym = prevSym + [prevSym[0]]
           symbolLookup += sym
-          if(len(dictDecode) < 65536):
-            # dictDecode[symbols[index]] = tuple(sym)
+          if(len(dictDecode) < 65536): # dictionary restricted like encoding case
             dictDecode[len(dictDecode)] = tuple(sym)
           prevSym = sym
 
     # undo the 'difference' encoding
   symbolLookupIter = iter(symbolLookup)
 
-  if (channels == 3):
+  if (channels == 3): # if colour (3 channel) image
     for y in range(rows):
       for x in range(columns):
         for c in range(channels):
-          if (x == 0):
+          if (x == 0): # no pixels to the left
             diffImgDecode[y,x,c] = symbolLookupIter.next()
             img[y,x,c] = diffImgDecode[y,x,c]
-          else:
+          else: # undo difference encoding
             diffImgDecode[y,x,c] = symbolLookupIter.next()
             img[y,x,c] = int(diffImgDecode[y,x,c])  + int(img[y,x-1,c])  - 255
-  else:
+  else: # if intensity only image (1 channel)
     for y in range(rows):
       for x in range(columns):
         if (x == 0):
@@ -275,7 +232,7 @@ def uncompress( inputFile, outputFile ):
             diffImgDecode[y,x] = symbolLookupIter.next()
             img[y,x] = int(diffImgDecode[y,x])  + int(img[y,x-1])  - 255
 
-  endTime = time.time()
+  endTime = time.time() # stop timer
 
   # Output the image
 
