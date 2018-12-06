@@ -248,8 +248,8 @@ def uncompress( inputFile, outputFile ):
           sym = prevSym + [prevSym[0]]
           symbolLookup += sym
           if(len(dictDecode) < 65536):
-            dictDecode[symbols[index]] = tuple(sym)
-          # dictDecode[len(dictDecode)] = tuple(sym)
+            # dictDecode[symbols[index]] = tuple(sym)
+            dictDecode[len(dictDecode)] = tuple(sym)
           prevSym = sym
 
     # undo the 'difference' encoding
